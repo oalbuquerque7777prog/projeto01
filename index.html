@@ -18,13 +18,13 @@
     <main class="dashboard">
         <div class="crypto-card" id="card-bitcoin">
             <div class="card-header">
-                <img src="https://cryptologos.cc/logos/bitcoin-btc-logo.svg" alt="BTC">
+                <img src="https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/btc.png" alt="BTC">
                 <div class="coin-info">
                     <h2>Bitcoin</h2>
                     <span class="symbol">BTC/USDT</span>
                 </div>
                 <div class="price-container">
-                    <div class="price" id="btc-price">$0.00</div>
+                    <div class="price" id="btc-price">Carregando...</div>
                     <div class="change" id="btc-change">0.00%</div>
                 </div>
             </div>
@@ -33,13 +33,13 @@
 
         <div class="crypto-card" id="card-ethereum">
             <div class="card-header">
-                <img src="https://cryptologos.cc/logos/ethereum-eth-logo.svg" alt="ETH">
+                <img src="https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/eth.png" alt="ETH">
                 <div class="coin-info">
                     <h2>Ethereum</h2>
                     <span class="symbol">ETH/USDT</span>
                 </div>
                 <div class="price-container">
-                    <div class="price" id="eth-price">$0.00</div>
+                    <div class="price" id="eth-price">Carregando...</div>
                     <div class="change" id="eth-change">0.00%</div>
                 </div>
             </div>
@@ -48,18 +48,33 @@
 
         <div class="crypto-card" id="card-solana">
             <div class="card-header">
-                <img src="https://cryptologos.cc/logos/solana-sol-logo.svg" alt="SOL">
+                <img src="https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/sol.png" alt="SOL">
                 <div class="coin-info">
                     <h2>Solana</h2>
                     <span class="symbol">SOL/USDT</span>
                 </div>
                 <div class="price-container">
-                    <div class="price" id="sol-price">$0.00</div>
+                    <div class="price" id="sol-price">Carregando...</div>
                     <div class="change" id="sol-change">0.00%</div>
                 </div>
             </div>
             <div class="chart-container" id="sol-chart"></div>
         </div>
+
+        <section class="extra-tools">
+            <div class="tool-card converter-box">
+                <h3 class="tool-title">🔄 Conversor Digital</h3>
+                <script src="https://widgets.coingecko.com/gecko-coin-converter-widget.js"></script>
+                <gecko-coin-converter-widget locale="pt" outlined="true" coin-id="bitcoin" initial-currency="usd"></gecko-coin-converter-widget>
+            </div>
+
+            <div class="tool-card news-box">
+                <h3 class="tool-title">📰 Notícias em Destaque</h3>
+                <div id="news-container" class="news-list">
+                    <div class="loading-news">Carregando últimas notícias...</div>
+                </div>
+            </div>
+        </section>
     </main>
 
     <script src="script.js"></script>
