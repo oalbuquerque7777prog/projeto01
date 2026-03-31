@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crypto Dash - Neon Red</title>
+    <title>Crypto Dashboard Neon</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Orbitron:wght@500&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
@@ -12,49 +12,49 @@
 
     <header>
         <div class="logo">CRYPTO<span>NEON</span></div>
-        <div id="connection-status" class="status-online">Sistema Online</div>
+        <div id="connection-status" class="status-online">Dados: CoinGecko</div>
     </header>
 
     <main class="dashboard">
-        <div class="crypto-card" id="card-bitcoin">
+        <div class="crypto-card">
             <div class="card-header">
-                <img src="https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/btc.png" alt="BTC">
+                <img src="https://assets.coingecko.com/coins/images/1/large/bitcoin.png" alt="BTC">
                 <div class="coin-info">
                     <h2>Bitcoin</h2>
-                    <span class="symbol">BTC/USDT</span>
+                    <span class="symbol">BTC/USD</span>
                 </div>
                 <div class="price-container">
-                    <div class="price" id="btc-price">Carregando...</div>
+                    <div class="price" id="btc-price">$ --.--</div>
                     <div class="change" id="btc-change">0.00%</div>
                 </div>
             </div>
             <div class="chart-container" id="btc-chart"></div>
         </div>
 
-        <div class="crypto-card" id="card-ethereum">
+        <div class="crypto-card">
             <div class="card-header">
-                <img src="https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/eth.png" alt="ETH">
+                <img src="https://assets.coingecko.com/coins/images/279/large/ethereum.png" alt="ETH">
                 <div class="coin-info">
                     <h2>Ethereum</h2>
-                    <span class="symbol">ETH/USDT</span>
+                    <span class="symbol">ETH/USD</span>
                 </div>
                 <div class="price-container">
-                    <div class="price" id="eth-price">Carregando...</div>
+                    <div class="price" id="eth-price">$ --.--</div>
                     <div class="change" id="eth-change">0.00%</div>
                 </div>
             </div>
             <div class="chart-container" id="eth-chart"></div>
         </div>
 
-        <div class="crypto-card" id="card-solana">
+        <div class="crypto-card">
             <div class="card-header">
-                <img src="https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/sol.png" alt="SOL">
+                <img src="https://assets.coingecko.com/coins/images/4128/large/solana.png" alt="SOL">
                 <div class="coin-info">
                     <h2>Solana</h2>
-                    <span class="symbol">SOL/USDT</span>
+                    <span class="symbol">SOL/USD</span>
                 </div>
                 <div class="price-container">
-                    <div class="price" id="sol-price">Carregando...</div>
+                    <div class="price" id="sol-price">$ --.--</div>
                     <div class="change" id="sol-change">0.00%</div>
                 </div>
             </div>
@@ -62,17 +62,14 @@
         </div>
 
         <section class="extra-tools">
-            <div class="tool-card converter-box">
-                <h3 class="tool-title">🔄 Conversor Digital</h3>
+            <div class="tool-card">
+                <h3 class="tool-title">🔄 Conversor Instantâneo</h3>
                 <script src="https://widgets.coingecko.com/gecko-coin-converter-widget.js"></script>
                 <gecko-coin-converter-widget locale="pt" outlined="true" coin-id="bitcoin" initial-currency="usd"></gecko-coin-converter-widget>
             </div>
-
-            <div class="tool-card news-box">
-                <h3 class="tool-title">📰 Notícias em Destaque</h3>
-                <div id="news-container" class="news-list">
-                    <div class="loading-news">Carregando últimas notícias...</div>
-                </div>
+            <div class="tool-card">
+                <h3 class="tool-title">📰 Notícias Mercado</h3>
+                <div id="news-container" class="news-list">Carregando feed...</div>
             </div>
         </section>
     </main>
