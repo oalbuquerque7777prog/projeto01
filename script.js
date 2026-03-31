@@ -1,90 +1,93 @@
-const cryptoList = [
-    { id: 'bitcoin', short: 'btc' },
-    { id: 'ethereum', short: 'eth' },
-    { id: 'solana', short: 'sol' }
+const coins = [
+    { id: 'btc', symbol: 'BTCUSDT' },
+    { id: 'eth', symbol: 'ETHUSDT' },
+    { id: 'sol', symbol: 'SOLUSDT' }
 ];
 
 const charts = {};
 
-// 1. Iniciar os gráficos (vazios)
+// 1. Iniciar Gráficos
 function initCharts() {
-    cryptoList.forEach(coin => {
-        const container = document.getElementById(`${coin.short}-chart`);
+    coins.forEach(coin => {
+        const container = document.getElementById(`${coin.id}-chart`);
         const chart = LightweightCharts.createChart(container, {
             layout: { background: { color: 'transparent' }, textColor: '#888' },
             grid: { vertLines: { visible: false }, horzLines: { color: '#222' } },
             width: container.offsetWidth,
             height: 200,
-            timeScale: { borderVisible: false }
+            timeScale: { borderVisible: false, timeVisible: true }
         });
 
         const series = chart.addAreaSeries({
             lineColor: '#ff003c',
-            topColor: 'rgba(255, 0, 60, 0.3)',
+            topColor: 'rgba(255, 0, 60, 0.4)',
             bottomColor: 'rgba(255, 0, 60, 0)',
             lineWidth: 2
         });
 
-        charts[coin.short] = series;
+        charts[coin.id] = series;
+        fetchCoinData(coin);
     });
 }
 
-// 2. Buscar Preços e Dados do Gráfico
-async function updateData() {
+// 2. Buscar Dados (Preço + Gráfico)
+async function fetchCoinData(coin) {
     try {
-        for (const coin of cryptoList) {
-            // Preço e Variação
-            const priceRes = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${coin.id}&vs_currencies=usd&include_24hr_change=true`);
-            const priceData = await priceRes.json();
-            
-            const price = priceData[coin.id].usd;
-            const change = priceData[coin.id].usd_24h_change;
+        // Preço atual da Binance
+        const priceRes = await fetch(`https://api.binance.com/api/v3/ticker/24hr?symbol=${coin.symbol}`);
+        const priceData = await priceRes.json();
+        
+        updateUI(coin.id, priceData.lastPrice, priceData.priceChangePercent);
 
-            document.getElementById(`${coin.short}-price`).innerText = `$${price.toLocaleString()}`;
-            const changeEl = document.getElementById(`${coin.short}-change`);
-            changeEl.innerText = `${change >= 0 ? '+' : ''}${change.toFixed(2)}%`;
-            changeEl.className = `change ${change >= 0 ? 'pos' : 'neg'}`;
+        // Dados do gráfico (Klines/Candlesticks de 1h)
+        const candleRes = await fetch(`https://api.binance.com/api/v3/klines?symbol=${coin.symbol}&interval=1h&limit=100`);
+        const candleData = await candleRes.json();
+        
+        const chartPoints = candleData.map(c => ({
+            time: c[0] / 1000,
+            value: parseFloat(c[4]) // Preço de fechamento
+        }));
 
-            // Dados do Gráfico (Últimas 24h)
-            const chartRes = await fetch(`https://api.coingecko.com/api/v3/coins/${coin.id}/market_chart?vs_currency=usd&days=1`);
-            const chartData = await chartRes.json();
-            
-            const formattedHistory = chartData.prices.map(p => ({
-                time: p[0] / 1000,
-                value: p[1]
-            }));
-            
-            charts[coin.short].setData(formattedHistory);
-        }
+        charts[coin.id].setData(chartPoints);
     } catch (error) {
-        console.error("Erro ao buscar dados:", error);
+        console.error("Erro na API da Binance:", error);
+        document.getElementById(`${coin.id}-price`).innerText = "Erro API";
     }
 }
 
-// 3. Notícias (Fallback seguro)
-async function getNews() {
+function updateUI(id, price, change) {
+    const priceEl = document.getElementById(`${id}-price`);
+    const changeEl = document.getElementById(`${id}-change`);
+    
+    const p = parseFloat(price);
+    priceEl.innerText = p.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+    
+    const c = parseFloat(change);
+    changeEl.innerText = `${c >= 0 ? '+' : ''}${c.toFixed(2)}%`;
+    changeEl.style.color = c >= 0 ? "#00ff88" : "#ff003c";
+}
+
+// 3. Notícias (CryptoCompare)
+async function fetchNews() {
     try {
         const res = await fetch('https://min-api.cryptocompare.com/data/v2/news/?lang=EN');
         const data = await res.json();
         const container = document.getElementById('news-container');
-        container.innerHTML = '';
-        data.Data.slice(0, 5).forEach(item => {
-            container.innerHTML += `
-                <a href="${item.url}" target="_blank" class="news-item">
-                    <h4>${item.title}</h4>
-                    <span>${item.source}</span>
-                </a>`;
-        });
+        container.innerHTML = data.Data.slice(0, 5).map(n => `
+            <a href="${n.url}" target="_blank" class="news-item">
+                <h4>${n.title}</h4>
+                <span>${n.source}</span>
+            </a>
+        `).join('');
     } catch (e) {
-        document.getElementById('news-container').innerText = "Erro ao carregar notícias.";
+        console.log("Erro nas notícias");
     }
 }
 
-// Inicialização
+// Rodar tudo
 window.onload = () => {
     initCharts();
-    updateData();
-    getNews();
-    // Atualiza a cada 60 segundos para não estourar o limite gratuito da API
-    setInterval(updateData, 60000);
+    fetchNews();
+    // Atualiza os preços a cada 30 segundos
+    setInterval(() => coins.forEach(fetchCoinData), 30000);
 };
