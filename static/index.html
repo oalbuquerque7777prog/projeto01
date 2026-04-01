@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Crypto Dash Python</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&family=Inter:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <div class="logo">CRYPTO<span>NEON</span></div>
+        <div class="status">SERVIDOR PYTHON ATIVO</div>
+    </header>
+
+    <main class="dashboard">
+        {% for crypto in cryptos %}
+        <div class="crypto-card">
+            <div class="card-header">
+                <img src="https://c1.coinlore.com/img/25x25/{{crypto.img}}.png" alt="icon">
+                <div class="coin-info">
+                    <h2>{{ crypto.name }}</h2>
+                    <span class="symbol">{{ crypto.symbol }}/USD</span>
+                </div>
+                <div class="price-container">
+                    <div class="price">{{ crypto.price }}</div>
+                    <div class="change {% if crypto.change >= 0 %}pos{% else %}neg{% endif %}">
+                        {{ "+" if crypto.change >= 0 }}{{ crypto.change }}%
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+
+        <section class="extra-tools">
+            <div class="tool-card news-box">
+                <h3 class="tool-title">📰 Notícias em Destaque</h3>
+                {% for item in news %}
+                <a href="{{ item.url }}" target="_blank" class="news-item">
+                    <h4>{{ item.title }}</h4>
+                    <span>{{ item.source }}</span>
+                </a>
+                {% endfor %}
+            </div>
+        </section>
+    </main>
+</body>
+</html>

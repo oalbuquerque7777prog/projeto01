@@ -1,0 +1,67 @@
+:root {
+    --bg: #0d0d0d;
+    --card: #1a1a1a;
+    --neon-red: #ff003c;
+    --neon-green: #00ff88;
+    --text: #ffffff;
+}
+
+body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+    padding: 20px;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    padding-bottom: 30px;
+    border-bottom: 1px solid #333;
+}
+
+.logo {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.5rem;
+    text-shadow: 0 0 10px var(--neon-red);
+}
+
+.logo span { color: var(--neon-red); }
+
+.dashboard {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-top: 30px;
+}
+
+.crypto-card {
+    background: var(--card);
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid #333;
+    transition: 0.3s;
+}
+
+.crypto-card:hover {
+    border-color: var(--neon-red);
+    box-shadow: 0 0 15px rgba(255, 0, 60, 0.2);
+}
+
+.card-header { display: flex; align-items: center; gap: 15px; }
+
+.price { font-weight: bold; font-size: 1.2rem; }
+
+.pos { color: var(--neon-green); }
+.neg { color: var(--neon-red); }
+
+.news-item {
+    display: block;
+    padding: 10px 0;
+    border-bottom: 1px solid #222;
+    text-decoration: none;
+    color: #ccc;
+}
+
+.news-item h4 { margin: 5px 0; font-size: 0.9rem; color: #fff; }
