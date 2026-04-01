@@ -1,4 +1,3 @@
-// IDs CoinLore: BTC=90, ETH=80, SOL=48543
 const coins = [
     { id: '90', symbol: 'BTCUSDT' },
     { id: '80', symbol: 'ETHUSDT' },
@@ -7,85 +6,71 @@ const coins = [
 
 const charts = {};
 
-// Inicializa os gráficos
 function initCharts() {
     coins.forEach(coin => {
         const container = document.getElementById(`${coin.id}-chart`);
+        if (!container) return;
+
         const chart = LightweightCharts.createChart(container, {
             layout: { background: { color: 'transparent' }, textColor: '#888' },
             grid: { vertLines: { visible: false }, horzLines: { color: '#222' } },
             width: container.offsetWidth,
-            height: 200,
+            height: 180,
             timeScale: { borderVisible: false }
         });
 
         const series = chart.addAreaSeries({
             lineColor: '#ff003c',
-            topColor: 'rgba(255, 0, 60, 0.4)',
-            bottomColor: 'rgba(255, 0, 60, 0)',
+            topColor: 'rgba(255, 0, 60, 0.3)',
+            bottomColor: 'transparent',
             lineWidth: 2
         });
 
         charts[coin.id] = series;
-        updateCoinData(coin);
+        updateData(coin);
     });
 }
 
-// Busca Preço (CoinLore) e Gráfico (Binance para maior precisão histórica)
-async function updateCoinData(coin) {
+async function updateData(coin) {
     try {
-        // 1. Pegar Preço Atual via CoinLore
-        const res = await fetch(`https://api.coinlore.net/api/ticker/?id=${coin.id}`);
-        const data = await res.json();
+        // CoinLore API com cache breaker para evitar o "Carregando..."
+        const response = await fetch(`https://api.coinlore.net/api/ticker/?id=${coin.id}&t=${Math.random()}`);
+        const data = await response.json();
         const info = data[0];
 
+        // Atualiza UI
         const priceEl = document.getElementById(`${coin.id}-price`);
         const changeEl = document.getElementById(`${coin.id}-change`);
-
+        
         const price = parseFloat(info.price_usd);
         const change = parseFloat(info.percent_change_24h);
 
-        priceEl.innerText = price.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
-        changeEl.innerText = `${change >= 0 ? '+' : ''}${change.toFixed(2)}%`;
-        changeEl.style.color = change >= 0 ? "#00ff88" : "#ff003c";
+        priceEl.innerText = `$${price.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+        changeEl.innerText = `${change >= 0 ? '+' : ''}${change}%`;
+        changeEl.style.color = change >= 0 ? '#00ff88' : '#ff003c';
 
-        // 2. Atualizar Histórico do Gráfico (Binance - 1h)
-        const chartRes = await fetch(`https://api.binance.com/api/v3/klines?symbol=${coin.symbol}&interval=1h&limit=50`);
+        // Gráfico via Binance (Fallback estável)
+        const chartRes = await fetch(`https://api.binance.com/api/v3/klines?symbol=${coin.symbol}&interval=1h&limit=30`);
         const chartData = await chartRes.json();
         const points = chartData.map(d => ({
             time: d[0] / 1000,
             value: parseFloat(d[4])
         }));
+        
         charts[coin.id].setData(points);
+        document.getElementById('status').innerText = "Sistema Online";
 
     } catch (error) {
-        console.error("Erro ao carregar dados:", error);
+        console.error("Erro na carga:", error);
+        document.getElementById('status').innerText = "Erro na API";
     }
 }
 
-// Feed de Notícias
-async function getNews() {
-    const container = document.getElementById('news-container');
-    try {
-        const res = await fetch('https://min-api.cryptocompare.com/data/v2/news/?lang=EN');
-        const news = await res.json();
-        container.innerHTML = news.Data.slice(0, 5).map(n => `
-            <a href="${n.url}" target="_blank" class="news-item">
-                <h4>${n.title}</h4>
-                <span>${n.source}</span>
-            </a>
-        `).join('');
-    } catch (e) {
-        container.innerText = "Erro ao carregar notícias.";
-    }
-}
-
-// Iniciar sistema
-window.onload = () => {
+// Inicializa ao carregar a página
+window.addEventListener('load', () => {
     initCharts();
-    getNews();
-    // Atualizar dados a cada 45 segundos (tempo seguro para CoinLore)
+    // Atualiza a cada 30 segundos
     setInterval(() => {
-        coins.forEach(updateCoinData);
-    }, 45000);
-};
+        coins.forEach(updateData);
+    }, 30000);
+});
