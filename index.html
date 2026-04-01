@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crypto Dashboard Neon</title>
+    <title>Crypto Dashboard - CoinLore Engine</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Orbitron:wght@500&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
@@ -12,53 +12,53 @@
 
     <header>
         <div class="logo">CRYPTO<span>NEON</span></div>
-        <div id="connection-status" class="status-online">LIVE: BINANCE</div>
+        <div id="connection-status" class="status-online">Fonte: CoinLore API</div>
     </header>
 
     <main class="dashboard">
         <div class="crypto-card">
             <div class="card-header">
-                <img src="https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=024" alt="BTC">
+                <img src="https://c1.coinlore.com/img/25x25/bitcoin.png" alt="BTC">
                 <div class="coin-info">
                     <h2>Bitcoin</h2>
-                    <span class="symbol">BTC/USDT</span>
+                    <span class="symbol">BTC / USD</span>
                 </div>
                 <div class="price-container">
-                    <div class="price" id="btc-price">Buscando...</div>
-                    <div class="change" id="btc-change">0.00%</div>
+                    <div class="price" id="90-price">Carregando...</div>
+                    <div class="change" id="90-change">0.00%</div>
                 </div>
             </div>
-            <div class="chart-container" id="btc-chart"></div>
+            <div class="chart-container" id="90-chart"></div>
         </div>
 
         <div class="crypto-card">
             <div class="card-header">
-                <img src="https://cryptologos.cc/logos/ethereum-eth-logo.png?v=024" alt="ETH">
+                <img src="https://c1.coinlore.com/img/25x25/ethereum.png" alt="ETH">
                 <div class="coin-info">
                     <h2>Ethereum</h2>
-                    <span class="symbol">ETH/USDT</span>
+                    <span class="symbol">ETH / USD</span>
                 </div>
                 <div class="price-container">
-                    <div class="price" id="eth-price">Buscando...</div>
-                    <div class="change" id="eth-change">0.00%</div>
+                    <div class="price" id="80-price">Carregando...</div>
+                    <div class="change" id="80-change">0.00%</div>
                 </div>
             </div>
-            <div class="chart-container" id="eth-chart"></div>
+            <div class="chart-container" id="80-chart"></div>
         </div>
 
         <div class="crypto-card">
             <div class="card-header">
-                <img src="https://cryptologos.cc/logos/solana-sol-logo.png?v=024" alt="SOL">
+                <img src="https://c1.coinlore.com/img/25x25/solana.png" alt="SOL">
                 <div class="coin-info">
                     <h2>Solana</h2>
-                    <span class="symbol">SOL/USDT</span>
+                    <span class="symbol">SOL / USD</span>
                 </div>
                 <div class="price-container">
-                    <div class="price" id="sol-price">Buscando...</div>
-                    <div class="change" id="sol-change">0.00%</div>
+                    <div class="price" id="48543-price">Carregando...</div>
+                    <div class="change" id="48543-change">0.00%</div>
                 </div>
             </div>
-            <div class="chart-container" id="sol-chart"></div>
+            <div class="chart-container" id="48543-chart"></div>
         </div>
 
         <section class="extra-tools">
@@ -68,8 +68,8 @@
                 <gecko-coin-converter-widget locale="pt" outlined="true" coin-id="bitcoin" initial-currency="usd"></gecko-coin-converter-widget>
             </div>
             <div class="tool-card">
-                <h3 class="tool-title">📰 Notícias</h3>
-                <div id="news-container" class="news-list">Aguardando feed...</div>
+                <h3 class="tool-title">📰 Notícias Mercado</h3>
+                <div id="news-container" class="news-list">Buscando manchetes...</div>
             </div>
         </section>
     </main>
