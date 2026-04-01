@@ -1,12 +1,13 @@
+// IDs CoinLore: BTC=90, ETH=80, SOL=48543
 const coins = [
-    { id: 'btc', symbol: 'BTCUSDT' },
-    { id: 'eth', symbol: 'ETHUSDT' },
-    { id: 'sol', symbol: 'SOLUSDT' }
+    { id: '90', symbol: 'BTCUSDT' },
+    { id: '80', symbol: 'ETHUSDT' },
+    { id: '48543', symbol: 'SOLUSDT' }
 ];
 
 const charts = {};
 
-// 1. Iniciar Gráficos
+// Inicializa os gráficos
 function initCharts() {
     coins.forEach(coin => {
         const container = document.getElementById(`${coin.id}-chart`);
@@ -15,7 +16,7 @@ function initCharts() {
             grid: { vertLines: { visible: false }, horzLines: { color: '#222' } },
             width: container.offsetWidth,
             height: 200,
-            timeScale: { borderVisible: false, timeVisible: true }
+            timeScale: { borderVisible: false }
         });
 
         const series = chart.addAreaSeries({
@@ -26,68 +27,65 @@ function initCharts() {
         });
 
         charts[coin.id] = series;
-        fetchCoinData(coin);
+        updateCoinData(coin);
     });
 }
 
-// 2. Buscar Dados (Preço + Gráfico)
-async function fetchCoinData(coin) {
+// Busca Preço (CoinLore) e Gráfico (Binance para maior precisão histórica)
+async function updateCoinData(coin) {
     try {
-        // Preço atual da Binance
-        const priceRes = await fetch(`https://api.binance.com/api/v3/ticker/24hr?symbol=${coin.symbol}`);
-        const priceData = await priceRes.json();
-        
-        updateUI(coin.id, priceData.lastPrice, priceData.priceChangePercent);
+        // 1. Pegar Preço Atual via CoinLore
+        const res = await fetch(`https://api.coinlore.net/api/ticker/?id=${coin.id}`);
+        const data = await res.json();
+        const info = data[0];
 
-        // Dados do gráfico (Klines/Candlesticks de 1h)
-        const candleRes = await fetch(`https://api.binance.com/api/v3/klines?symbol=${coin.symbol}&interval=1h&limit=100`);
-        const candleData = await candleRes.json();
-        
-        const chartPoints = candleData.map(c => ({
-            time: c[0] / 1000,
-            value: parseFloat(c[4]) // Preço de fechamento
+        const priceEl = document.getElementById(`${coin.id}-price`);
+        const changeEl = document.getElementById(`${coin.id}-change`);
+
+        const price = parseFloat(info.price_usd);
+        const change = parseFloat(info.percent_change_24h);
+
+        priceEl.innerText = price.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+        changeEl.innerText = `${change >= 0 ? '+' : ''}${change.toFixed(2)}%`;
+        changeEl.style.color = change >= 0 ? "#00ff88" : "#ff003c";
+
+        // 2. Atualizar Histórico do Gráfico (Binance - 1h)
+        const chartRes = await fetch(`https://api.binance.com/api/v3/klines?symbol=${coin.symbol}&interval=1h&limit=50`);
+        const chartData = await chartRes.json();
+        const points = chartData.map(d => ({
+            time: d[0] / 1000,
+            value: parseFloat(d[4])
         }));
+        charts[coin.id].setData(points);
 
-        charts[coin.id].setData(chartPoints);
     } catch (error) {
-        console.error("Erro na API da Binance:", error);
-        document.getElementById(`${coin.id}-price`).innerText = "Erro API";
+        console.error("Erro ao carregar dados:", error);
     }
 }
 
-function updateUI(id, price, change) {
-    const priceEl = document.getElementById(`${id}-price`);
-    const changeEl = document.getElementById(`${id}-change`);
-    
-    const p = parseFloat(price);
-    priceEl.innerText = p.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
-    
-    const c = parseFloat(change);
-    changeEl.innerText = `${c >= 0 ? '+' : ''}${c.toFixed(2)}%`;
-    changeEl.style.color = c >= 0 ? "#00ff88" : "#ff003c";
-}
-
-// 3. Notícias (CryptoCompare)
-async function fetchNews() {
+// Feed de Notícias
+async function getNews() {
+    const container = document.getElementById('news-container');
     try {
         const res = await fetch('https://min-api.cryptocompare.com/data/v2/news/?lang=EN');
-        const data = await res.json();
-        const container = document.getElementById('news-container');
-        container.innerHTML = data.Data.slice(0, 5).map(n => `
+        const news = await res.json();
+        container.innerHTML = news.Data.slice(0, 5).map(n => `
             <a href="${n.url}" target="_blank" class="news-item">
                 <h4>${n.title}</h4>
                 <span>${n.source}</span>
             </a>
         `).join('');
     } catch (e) {
-        console.log("Erro nas notícias");
+        container.innerText = "Erro ao carregar notícias.";
     }
 }
 
-// Rodar tudo
+// Iniciar sistema
 window.onload = () => {
     initCharts();
-    fetchNews();
-    // Atualiza os preços a cada 30 segundos
-    setInterval(() => coins.forEach(fetchCoinData), 30000);
+    getNews();
+    // Atualizar dados a cada 45 segundos (tempo seguro para CoinLore)
+    setInterval(() => {
+        coins.forEach(updateCoinData);
+    }, 45000);
 };
