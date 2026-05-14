@@ -1,4 +1,4 @@
-// --- SETUP ---
+// --- ENGINE SETUP ---
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
 const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -20,11 +20,12 @@ let lastFloorPassed = -1;
 const raycaster = new THREE.Raycaster();
 const downVector = new THREE.Vector3(0, -1, 0);
 
-// --- ELEMENTOS ---
+// --- ELEMENTOS DOM ---
 const inputAposta = document.getElementById('valorAposta');
 const btnSacar = document.getElementById('btnSacar');
+const menuContainer = document.getElementById('menu-container');
 
-// --- BOTÕES DE APOSTA (CORREÇÃO DE EDIÇÃO) ---
+// --- BOTÕES DE APOSTA ---
 document.getElementById('btnMais').onclick = () => {
     let v = parseFloat(inputAposta.value);
     if(v + 0.5 <= saldoBanca) inputAposta.value = (v + 0.5).toFixed(2);
@@ -43,17 +44,17 @@ function updateUI() {
 
 // --- SOM ---
 let audioCtx = null;
-function playCoinSound() {
+function playCoinSound(type) {
     if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
-    osc.frequency.setValueAtTime(1000, audioCtx.currentTime);
+    osc.frequency.setValueAtTime(type === 'win' ? 1500 : 1000, audioCtx.currentTime);
     gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
     osc.connect(gain); gain.connect(audioCtx.destination);
-    osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+    osc.start(); osc.stop(audioCtx.currentTime + 0.15);
 }
 
-// --- LOGICA DE JOGO ---
+// --- INICIAR JOGO ---
 document.getElementById('btnIniciar').onclick = () => {
     let valor = parseFloat(inputAposta.value);
     if(valor > saldoBanca) return alert("Saldo insuficiente!");
@@ -64,22 +65,46 @@ document.getElementById('btnIniciar').onclick = () => {
     lastFloorPassed = -1;
     updateUI();
     
-    document.getElementById('menu').style.display = 'none';
+    menuContainer.style.display = 'none';
     document.getElementById('ui').style.display = 'block';
     btnSacar.style.display = 'none';
+    
     generateLevel();
     gameRunning = true;
 };
 
-btnSacar.onclick = () => {
+// --- FUNÇÃO DE VITÓRIA ---
+function handleWin() {
+    if (!gameRunning) return;
     gameRunning = false;
-    saldoBanca += lucroRodada;
-    lucroRodada = 0;
-    btnSacar.style.display = 'none';
-    document.getElementById('ui').style.display = 'none';
-    document.getElementById('menu').style.display = 'block';
+    
+    let apostaBase = parseFloat(inputAposta.value);
+    lucroRodada += apostaBase * 2; // Bônus de 2x por fase completa
+    
+    currentLevel++;
     updateUI();
-};
+    
+    document.getElementById('msg').style.display = 'block';
+    playCoinSound('win');
+    
+    setTimeout(() => {
+        document.getElementById('msg').style.display = 'none';
+        btnSacar.style.display = 'block';
+        generateLevel();
+        gameRunning = true;
+    }, 1000);
+}
+
+// --- FUNÇÃO DE DERROTA ---
+function handleLose() {
+    gameRunning = false;
+    lucroRodada = 0;
+    alert("ERROU! Você perdeu o lucro acumulado.");
+    menuContainer.style.display = 'block';
+    document.getElementById('ui').style.display = 'none';
+    btnSacar.style.display = 'none';
+    updateUI();
+}
 
 function generateLevel() {
     if(!helixGroup) {
@@ -88,13 +113,13 @@ function generateLevel() {
     }
     while(helixGroup.children.length > 0) helixGroup.remove(helixGroup.children[0]);
     
-    const andares = 10 + currentLevel;
-    finishLineY = -(andares * 5); // Define a altura exata da chegada
+    const andares = 8 + (currentLevel * 2);
+    finishLineY = -(andares * 5);
 
     // Poste
     const tower = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.6, 0.6, (andares * 5) + 20, 16),
-        new THREE.MeshPhongMaterial({ color: 0x222222 })
+        new THREE.CylinderGeometry(0.6, 0.6, (andares * 5) + 30, 16),
+        new THREE.MeshPhongMaterial({ color: 0x111111 })
     );
     tower.position.y = finishLineY / 2;
     helixGroup.add(tower);
@@ -105,7 +130,7 @@ function generateLevel() {
         const buraco = Math.floor(Math.random() * 10);
         for (let j = 0; j < 10; j++) {
             if (j === buraco) continue;
-            const fatal = Math.random() < 0.18;
+            const fatal = Math.random() < 0.22; // Dificuldade aumenta
             const fatia = new THREE.Mesh(
                 new THREE.CylinderGeometry(2.5, 2.5, 0.5, 12, 1, false, (j * Math.PI * 2) / 10, (Math.PI * 2) / 10),
                 new THREE.MeshPhongMaterial({ color: fatal ? 0xff0000 : 0x00ccff })
@@ -117,10 +142,10 @@ function generateLevel() {
         helixGroup.add(disco);
     }
 
-    // Chegada (Aumentamos a altura visual da plataforma verde para 1.0 para garantir colisão)
+    // Chegada
     const finish = new THREE.Mesh(
-        new THREE.CylinderGeometry(3, 3, 1.0, 20),
-        new THREE.MeshPhongMaterial({ color: 0x00ff00, emissive: 0x004400 })
+        new THREE.CylinderGeometry(3.5, 3.5, 1.2, 20),
+        new THREE.MeshPhongMaterial({ color: 0x00ff00, emissive: 0x003300 })
     );
     finish.position.y = finishLineY;
     finish.userData = { isFinish: true };
@@ -128,49 +153,8 @@ function generateLevel() {
 
     ball.position.set(0, 3, 2.2);
     ballVelocityY = 0;
-}
-
-function handleWin() {
-    gameRunning = false;
-    let aposta = parseFloat(inputAposta.value);
-    lucroRodada += aposta * 1.5; // Bônus generoso de vitória
-    currentLevel++;
-    btnSacar.style.display = 'block';
-    document.getElementById('msg').style.display = 'block';
-    playCoinSound();
-    updateUI();
-    
-    setTimeout(() => {
-        document.getElementById('msg').style.display = 'none';
-        generateLevel();
-        gameRunning = true;
-    }, 1200);
-}
-
-function handleLose() {
-    gameRunning = false;
-    lucroRodada = 0;
-    alert("Bateu no vermelho! Perdeu o lucro.");
-    btnSacar.style.display = 'none';
-    document.getElementById('menu').style.display = 'block';
-    document.getElementById('ui').style.display = 'none';
-    updateUI();
-}
-
-function init() {
-    ball = new THREE.Mesh(
-        new THREE.SphereGeometry(0.25, 16, 16),
-        new THREE.MeshPhongMaterial({ color: 0xffff00 })
-    );
-    scene.add(ball);
-
-    scene.add(new THREE.AmbientLight(0xffffff, 0.9));
-    const light = new THREE.DirectionalLight(0xffffff, 0.5);
-    light.position.set(5, 10, 5);
-    scene.add(light);
-
-    camera.position.set(0, 5, 10);
-    animate();
+    lastFloorPassed = -1;
+    helixGroup.rotation.y = 0;
 }
 
 function animate() {
@@ -180,8 +164,8 @@ function animate() {
     ballVelocityY += gravity;
     ball.position.y += ballVelocityY;
 
-    // --- CORREÇÃO DA LINHA DE CHEGADA (CHECAGEM POR ALTURA) ---
-    if (ball.position.y <= finishLineY + 0.3) {
+    // Detectar Vitória por altura
+    if (ball.position.y <= finishLineY + 0.5) {
         handleWin();
         return;
     }
@@ -195,19 +179,23 @@ function animate() {
             if (target.userData.fatal) {
                 handleLose();
                 return;
+            } else if (target.userData.isFinish) {
+                handleWin();
+                return;
             } else {
                 ballVelocityY = jumpForce;
-                ball.position.y = intersects[0].point.y + 0.25;
+                ball.position.y = intersects[0].point.y + 0.28;
             }
         }
     }
 
-    // Ganhos por andar
+    // Lucro por andar (15% da aposta)
     let currentFloor = Math.floor(Math.abs(ball.position.y / 5));
     if (currentFloor > lastFloorPassed && ball.position.y < -1) {
-        lucroRodada += parseFloat(inputAposta.value) * 0.10;
+        let apostaAtiva = parseFloat(inputAposta.value);
+        lucroRodada += apostaAtiva * 0.15; 
         lastFloorPassed = currentFloor;
-        playCoinSound();
+        playCoinSound('step');
         updateUI();
     }
 
@@ -216,7 +204,7 @@ function animate() {
     renderer.render(scene, camera);
 }
 
-// --- CONTROLES MOBILE ---
+// --- CONTROLES ---
 let touchX = 0;
 window.ontouchstart = (e) => touchX = e.touches[0].clientX;
 window.ontouchmove = (e) => {
@@ -224,12 +212,30 @@ window.ontouchmove = (e) => {
     helixGroup.rotation.y += dx * 0.015;
     touchX = e.touches[0].clientX;
 };
-// Suporte para Mouse
-window.onmousedown = (e) => { touchX = e.clientX; window.onmousemove = (ev) => {
-    let dx = ev.clientX - touchX;
-    helixGroup.rotation.y += dx * 0.015;
-    touchX = ev.clientX;
-}};
-window.onmouseup = () => window.onmousemove = null;
+
+// Botão Sacar (Volta lucro para banca)
+btnSacar.onclick = () => {
+    gameRunning = false;
+    saldoBanca += lucroRodada;
+    lucroRodada = 0;
+    btnSacar.style.display = 'none';
+    document.getElementById('ui').style.display = 'none';
+    menuContainer.style.display = 'block';
+    updateUI();
+};
+
+function init() {
+    ball = new THREE.Mesh(
+        new THREE.SphereGeometry(0.28, 16, 16),
+        new THREE.MeshPhongMaterial({ color: 0xffff00, shininess: 100 })
+    );
+    scene.add(ball);
+    scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+    const light = new THREE.DirectionalLight(0xffffff, 0.5);
+    light.position.set(5, 10, 5);
+    scene.add(light);
+    camera.position.set(0, 5, 10);
+    animate();
+}
 
 init();
