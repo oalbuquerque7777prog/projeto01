@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Helix Cash - Final Fix</title>
+    <style>
+        body { margin: 0; overflow: hidden; background: #050505; font-family: 'Segoe UI', sans-serif; touch-action: none; }
+        canvas { display: block; }
+        
+        #ui { position: absolute; top: 10px; left: 10px; color: white; z-index: 5; pointer-events: none; display: none; }
+        .info { background: rgba(0,0,0,0.8); padding: 10px 15px; border-radius: 8px; margin-bottom: 5px; border-left: 4px solid #00ccff; font-size: 14px; }
+        .lucro-style { border-left-color: #00ff00; color: #00ff00; font-weight: bold; }
+        
+        #msg { position: absolute; top: 25%; left: 50%; transform: translateX(-50%); color: #ffff00; font-size: 28px; font-weight: 900; display: none; z-index: 10; text-shadow: 0 0 10px #000; text-align: center; width: 100%; }
+
+        #menu {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: #151515; padding: 30px; border-radius: 20px;
+            text-align: center; color: white; border: 2px solid #00ccff; z-index: 100;
+            width: 85%; max-width: 320px; box-shadow: 0 0 30px rgba(0,0,0,1);
+        }
+        
+        .bet-box { display: flex; justify-content: center; align-items: center; margin: 20px 0; background: #000; border-radius: 10px; padding: 10px; }
+        .bet-btn { background: #00ccff; color: #000; border: none; width: 45px; height: 45px; font-size: 24px; font-weight: bold; border-radius: 8px; cursor: pointer; }
+        input#valorAposta { width: 100px; background: transparent; color: #00ff00; border: none; font-size: 22px; text-align: center; font-weight: bold; outline: none; }
+
+        button#btnIniciar { width: 100%; padding: 18px; background: #28a745; color: white; border: none; border-radius: 12px; font-size: 20px; font-weight: bold; }
+        
+        #btnSacar {
+            display: none; position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%);
+            padding: 20px 50px; background: #ffc107; color: #000; border: none; border-radius: 50px;
+            font-size: 22px; font-weight: 900; z-index: 1000; box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+        }
+    </style>
+</head>
+<body>
+
+    <div id="ui">
+        <div class="info">💰 BANCA: R$ <span id="saldo">100.00</span></div>
+        <div class="info lucro-style">💎 LUCRO: R$ <span id="lucro">0.00</span></div>
+        <div class="info">🎮 FASE: <span id="level">1</span></div>
+    </div>
+
+    <div id="msg">BOOOA! +BÔNUS</div>
+
+    <div id="menu">
+        <h2 style="margin:0; color:#00ccff;">HELIX CASH</h2>
+        <p style="color:#888;">Banca: R$ <span id="bancaMenu">100.00</span></p>
+        <div class="bet-box">
+            <button class="bet-btn" id="btnMenos">-</button>
+            <input type="number" id="valorAposta" value="1.00" readonly>
+            <button class="bet-btn" id="btnMais">+</button>
+        </div>
+        <button id="btnIniciar">APOSTAR</button>
+    </div>
+
+    <button id="btnSacar">SACAR AGORA 💸</button>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>
