@@ -3,141 +3,129 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Helix Cash - Premium iGaming</title>
+    <title>Helix Cash - Official</title>
     <style>
-        body { margin: 0; overflow: hidden; background: #050505; font-family: 'Segoe UI', Arial, sans-serif; touch-action: none; }
+        body { margin: 0; overflow: hidden; background: #050505; font-family: 'Segoe UI', sans-serif; touch-action: none; }
         canvas { display: block; }
         
-        /* UI do Jogo (HUD) */
-        #ui { position: absolute; top: 10px; left: 10px; color: white; z-index: 5; pointer-events: none; display: none; }
-        .info { background: rgba(0,0,0,0.85); padding: 10px 15px; border-radius: 10px; margin-bottom: 5px; border-left: 4px solid #00ccff; font-size: 14px; box-shadow: 0 4px 8px rgba(0,0,0,0.3); }
-        .lucro-style { border-left-color: #00ff00; color: #00ff00; font-weight: bold; }
-        
-        #msg { position: absolute; top: 25%; left: 50%; transform: translateX(-50%); color: #ffff00; font-size: 28px; font-weight: 900; display: none; z-index: 10; text-shadow: 0 0 15px #000; text-align: center; width: 100%; }
+        /* Telas de Autenticação e Menu */
+        .overlay-container {
+            position: absolute; width: 100%; height: 100%; 
+            background: rgba(5,5,5,0.95); z-index: 2000; 
+            display: flex; align-items: center; justify-content: center;
+        }
 
-        /* Menu Principal e Container de Telas */
         #menu-container {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
             background: #151515; padding: 25px; border-radius: 24px;
-            text-align: center; color: white; border: 2px solid #00ccff; z-index: 100;
+            text-align: center; color: white; border: 2px solid #00ccff;
             width: 85%; max-width: 340px; box-shadow: 0 0 50px rgba(0,0,0,0.9);
         }
 
+        /* HUD Jogo */
+        #ui { position: absolute; top: 10px; left: 10px; color: white; z-index: 5; display: none; pointer-events: none; }
+        .info { background: rgba(0,0,0,0.8); padding: 10px; border-radius: 8px; margin-bottom: 5px; border-left: 4px solid #00ccff; font-size: 13px; }
+        .lucro-style { border-left-color: #00ff00; color: #00ff00; }
+
+        /* Estilos Internos */
         .menu-screen { display: none; }
         .menu-screen.active { display: block; }
-
-        /* Grade de Botões de Navegação */
         .nav-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 15px 0; }
-        .nav-btn { background: #2a2a2a; color: white; border: 1px solid #444; padding: 12px; border-radius: 10px; font-size: 13px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        .nav-btn:active { transform: scale(0.95); background: #333; }
-        .btn-deposito { background: #007bff !important; border: none; }
-        .btn-saque { background: #6c757d !important; border: none; }
+        .nav-btn { background: #2a2a2a; color: white; border: 1px solid #444; padding: 12px; border-radius: 10px; font-size: 12px; font-weight: bold; cursor: pointer; }
+        .btn-deposito { background: #007bff !important; }
+        .btn-saque { background: #6c757d !important; }
 
-        /* Caixa de Aposta */
-        .bet-box { display: flex; justify-content: center; align-items: center; margin: 20px 0; background: #000; border-radius: 12px; padding: 10px; border: 1px solid #333; }
-        .bet-btn { background: #00ccff; color: #000; border: none; width: 45px; height: 45px; font-size: 24px; font-weight: bold; border-radius: 8px; cursor: pointer; }
-        input#valorAposta { width: 100px; background: transparent; color: #00ff00; border: none; font-size: 22px; text-align: center; font-weight: bold; outline: none; -moz-appearance: textfield; }
-        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        input.auth-input { width: 85%; padding: 12px; margin: 8px 0; background: #222; border: 1px solid #444; color: white; border-radius: 8px; text-align: center; }
+        
+        .bet-box { display: flex; justify-content: center; align-items: center; margin: 15px 0; background: #000; border-radius: 10px; padding: 8px; }
+        .bet-btn { background: #00ccff; color: #000; border: none; width: 40px; height: 40px; font-size: 20px; font-weight: bold; border-radius: 8px; }
+        input#valorAposta { width: 80px; background: transparent; color: #00ff00; border: none; font-size: 20px; text-align: center; font-weight: bold; outline: none; }
 
-        button#btnIniciar { width: 100%; padding: 18px; background: #28a745; color: white; border: none; border-radius: 12px; font-size: 20px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 0 #1e7e34; }
-        button#btnIniciar:active { transform: translateY(2px); box-shadow: none; }
-
-        /* Botão de Saque em Jogo */
+        button.main-action { width: 100%; padding: 16px; background: #28a745; color: white; border: none; border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer; }
+        
         #btnSacar {
-            display: none; position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%);
-            padding: 20px 50px; background: linear-gradient(to bottom, #ffc107, #e0a800); 
-            color: #000; border: none; border-radius: 50px;
-            font-size: 22px; font-weight: 900; z-index: 1000; box-shadow: 0 10px 25px rgba(0,0,0,0.6);
-            border: 2px solid #fff;
+            display: none; position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+            padding: 18px 45px; background: #ffc107; color: #000; border: none; border-radius: 50px;
+            font-size: 20px; font-weight: 900; z-index: 1000;
         }
 
-        .back-btn { background: transparent; color: #00ccff; border: none; cursor: pointer; margin-bottom: 10px; font-weight: bold; }
+        #msg { position: absolute; top: 20%; width: 100%; text-align: center; color: #ffff00; font-size: 24px; font-weight: 900; display: none; z-index: 10; }
     </style>
 </head>
 <body>
 
-    <!-- HUD -->
+    <!-- TELA DE CADASTRO -->
+    <div id="auth-screen" class="overlay-container">
+        <div id="menu-container">
+            <h2 style="color:#00ccff; margin-bottom: 5px;">CADASTRO</h2>
+            <p style="color:#888; font-size: 13px; margin-bottom: 20px;">Insira seus dados para jogar</p>
+            <input type="text" id="regUser" class="auth-input" placeholder="Nome de Usuário">
+            <input type="password" id="regPass" class="auth-input" placeholder="Sua Senha">
+            <button class="main-action" id="btnCadastrar" style="margin-top: 15px;">CRIAR CONTA</button>
+        </div>
+    </div>
+
+    <!-- HUD DO JOGO -->
     <div id="ui">
-        <div class="info">💰 BANCA: R$ <span id="saldo">100.00</span></div>
+        <div class="info">💰 SALDO: R$ <span id="saldo">0.00</span></div>
         <div class="info lucro-style">💎 LUCRO: R$ <span id="lucro">0.00</span></div>
         <div class="info">🎮 FASE: <span id="level">1</span></div>
     </div>
 
     <div id="msg">LEVEL UP!</div>
 
-    <!-- CONTAINER DE TELAS DO MENU -->
-    <div id="menu-container">
-        
-        <!-- Tela Principal -->
-        <div id="screen-main" class="menu-screen active">
-            <h2 style="margin:0; color:#00ccff; letter-spacing: 2px;">HELIX CASH</h2>
-            <p style="color:#888; margin-top: 5px;">Banca: R$ <span id="bancaMenu">100.00</span></p>
-
-            <div class="nav-grid">
-                <button class="nav-btn" onclick="showScreen('screen-conta')">👤 CONTA</button>
-                <button class="nav-btn" onclick="showScreen('screen-saldo')">💰 SALDO</button>
-                <button class="nav-btn btn-deposito" onclick="showScreen('screen-deposito')">📥 DEPÓSITO</button>
-                <button class="nav-btn btn-saque" onclick="showScreen('screen-saque')">📤 SAQUE</button>
-            </div>
-
-            <hr style="border: 0; border-top: 1px solid #333; margin: 20px 0;">
+    <!-- MENU PRINCIPAL (Oculto até o login) -->
+    <div id="main-menu" class="overlay-container" style="display: none;">
+        <div id="menu-container">
             
-            <label style="font-size: 11px; color: #888; text-transform: uppercase;">Aposta por rodada</label>
-            <div class="bet-box">
-                <button class="bet-btn" id="btnMenos">-</button>
-                <input type="number" id="valorAposta" value="1.00" readonly>
-                <button class="bet-btn" id="btnMais">+</button>
+            <div id="screen-main" class="menu-screen active">
+                <h2 style="margin:0; color:#00ccff;">HELIX CASH</h2>
+                <p style="color:#aaa; font-size: 14px;">Olá, <b id="displayUser">...</b></p>
+                <p style="color:#888;">Banca: R$ <span id="bancaMenu">0.00</span></p>
+
+                <div class="nav-grid">
+                    <button class="nav-btn" onclick="openTab('screen-conta')">👤 CONTA</button>
+                    <button class="nav-btn" onclick="openTab('screen-saldo')">💰 SALDO</button>
+                    <button class="nav-btn btn-deposito" onclick="openTab('screen-deposito')">📥 DEPÓSITO</button>
+                    <button class="nav-btn btn-saque" onclick="openTab('screen-saque')">📤 SAQUE</button>
+                </div>
+
+                <div class="bet-box">
+                    <button class="bet-btn" onclick="adjustBet(-0.5)">-</button>
+                    <input type="number" id="valorAposta" value="1.00" readonly>
+                    <button class="bet-btn" onclick="adjustBet(0.5)">+</button>
+                </div>
+                <button class="main-action" id="btnIniciar">APOSTAR AGORA</button>
+                <p onclick="clearData()" style="color: #555; font-size: 10px; margin-top: 20px; cursor: pointer;">RESETAR DADOS</p>
             </div>
-            <button id="btnIniciar">APOSTAR</button>
-        </div>
 
-        <!-- Tela Minha Conta -->
-        <div id="screen-conta" class="menu-screen">
-            <button class="back-btn" onclick="showScreen('screen-main')">← VOLTAR</button>
-            <h3>👤 MINHA CONTA</h3>
-            <p style="color:#aaa; font-size: 14px;">Usuário: Jogador_Helix</p>
-            <p style="color:#aaa; font-size: 14px;">ID: #45892</p>
-        </div>
+            <div id="screen-sub" class="menu-screen">
+                <button onclick="openTab('screen-main')" style="background:none; border:none; color:#00ccff; cursor:pointer;">← VOLTAR</button>
+                <div id="sub-content" style="margin-top: 20px;"></div>
+            </div>
 
-        <!-- Tela Saldo -->
-        <div id="screen-saldo" class="menu-screen">
-            <button class="back-btn" onclick="showScreen('screen-main')">← VOLTAR</button>
-            <h3>💰 HISTÓRICO</h3>
-            <p style="color:#aaa; font-size: 12px;">Últimas jogadas aparecerão aqui.</p>
         </div>
-
-        <!-- Tela Depósito -->
-        <div id="screen-deposito" class="menu-screen">
-            <button class="back-btn" onclick="showScreen('screen-main')">← VOLTAR</button>
-            <h3>📥 DEPÓSITO PIX</h3>
-            <p style="color:#aaa; font-size: 14px;">Valor mínimo: R$ 10,00</p>
-            <button class="nav-btn btn-deposito" style="width:100%">GERAR QR CODE</button>
-        </div>
-
-        <!-- Tela Saque -->
-        <div id="screen-saque" class="menu-screen">
-            <button class="back-btn" onclick="showScreen('screen-main')">← VOLTAR</button>
-            <h3>📤 SAQUE RÁPIDO</h3>
-            <p style="color:#aaa; font-size: 14px;">Disponível: R$ <span class="bancaMenuLabel">100.00</span></p>
-            <button class="nav-btn btn-saque" style="width:100%">SOLICITAR PIX</button>
-        </div>
-
     </div>
 
-    <button id="btnSacar">SACAR AGORA 💸</button>
+    <button id="btnSacar">SACAR LUCRO 💸</button>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="game.js"></script>
-    
     <script>
-        // Função para alternar entre as telas do menu
-        function showScreen(screenId) {
-            document.querySelectorAll('.menu-screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(screenId).classList.add('active');
-            
-            // Atualiza labels de banca nas telas internas
-            const labels = document.querySelectorAll('.bancaMenuLabel');
-            labels.forEach(l => l.innerText = document.getElementById('bancaMenu').innerText);
+        // Lógica de abas simples
+        function openTab(tabId) {
+            const main = document.getElementById('screen-main');
+            const sub = document.getElementById('screen-sub');
+            const content = document.getElementById('sub-content');
+
+            if(tabId === 'screen-main') {
+                sub.classList.remove('active');
+                main.classList.add('active');
+            } else {
+                main.classList.remove('active');
+                sub.classList.add('active');
+                let titulos = { 'screen-conta': 'MINHA CONTA', 'screen-saldo': 'HISTÓRICO', 'screen-deposito': 'DEPÓSITO PIX', 'screen-saque': 'SAQUE RÁPIDO' };
+                content.innerHTML = `<h3>${titulos[tabId]}</h3><p style="color:#888;">Funcionalidade em desenvolvimento para sua conta.</p>`;
+            }
         }
     </script>
 </body>
